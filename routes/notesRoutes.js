@@ -27,32 +27,36 @@ router.get('/', requireAuth, async (req, res) => {
     const rows = await noteService.getAllNotes(user.id);
 
     const listHtml = rows
-      .map(
-        (note) => `
-        <div class="card mb-3 note-list-item">
-          <div class="card-body">
-            <h5 class="card-title mb-1">
-              <a href="/notes/${note.id}" class="link-dark text-decoration-none">
-                ${escapeHtml(note.title)}
-              </a>
-            </h5>
-            <small class="text-muted d-block mb-2">
-              ${escapeHtml(note.created_at)}
-            </small>
-            <p class="card-text">${escapeHtml(note.snippet || '')}...</p>
-            <div class="mt-2 d-flex flex-wrap gap-2">
-              <a href="/notes/${note.id}/edit" class="btn btn-sm btn-primary">Editar</a>
-              <form action="/notes/${note.id}/delete" method="POST" onsubmit="return confirm('¿Eliminar nota?');">
-                <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
-              </form>
-              <a href="/notes/${note.id}/pdf" target="_blank" class="btn btn-sm btn-outline-secondary">
-                PDF
-              </a>
+      .map((note) => {
+        const safeSnippet = sanitizeNoteHtml(note.snippet || '');
+
+        return `
+          <div class="card mb-3 note-list-item">
+            <div class="card-body">
+              <h5 class="card-title mb-1">
+                <a href="/notes/${note.id}" class="link-dark text-decoration-none">
+                  ${escapeHtml(note.title)}
+                </a>
+              </h5>
+              <small class="text-muted d-block mb-2">
+                ${escapeHtml(note.created_at)}
+              </small>
+              <div class="card-text">
+                ${safeSnippet || '<span class="text-muted">(sin contenido)</span>'}
+              </div>
+              <div class="mt-2 d-flex flex-wrap gap-2">
+                <a href="/notes/${note.id}/edit" class="btn btn-sm btn-primary">Editar</a>
+                <form action="/notes/${note.id}/delete" method="POST" onsubmit="return confirm('¿Eliminar nota?');">
+                  <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                </form>
+                <a href="/notes/${note.id}/pdf" target="_blank" class="btn btn-sm btn-outline-secondary">
+                  PDF
+                </a>
+              </div>
             </div>
           </div>
-        </div>
-      `
-      )
+        `;
+      })
       .join('');
 
     res.send(
@@ -73,6 +77,7 @@ router.get('/', requireAuth, async (req, res) => {
     res.status(500).send('Error al leer notas');
   }
 });
+
 
 /* ============================================================================
    NUEVA NOTA
