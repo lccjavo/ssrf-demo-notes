@@ -5,6 +5,7 @@ const noteService = require('../services/noteService');
 const { createNotePdf } = require('../services/pdfService');
 const { layout, escapeHtml } = require('../utils/view');
 const { sanitizeNoteHtml } = require('../utils/sanitize');
+const puppeteer = require('puppeteer');
 
 // Helpers de auth
 function getCurrentUser(req) {
@@ -288,6 +289,8 @@ router.post('/notes/:id/delete', requireAuth, async (req, res) => {
 /* ============================================================================
    PDF (solo si pertenece al usuario)
 ============================================================================ */
+
+
 router.get('/notes/:id/pdf', requireAuth, async (req, res) => {
   const user = getCurrentUser(req);
   const { id } = req.params;
@@ -311,5 +314,8 @@ router.get('/notes/:id/pdf', requireAuth, async (req, res) => {
     res.status(500).send('Error al generar PDF');
   }
 });
+
+
+
 
 module.exports = router;
