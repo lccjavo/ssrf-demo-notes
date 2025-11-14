@@ -1,185 +1,170 @@
-# 📌 SSRF Demo Notes -- Express / Node.js
+# 📌 SSRF Demo Notes – Express / Node.js
 
-`ssrf-demo-notes` es una aplicación construida en **Node.js + Express +
-SQLite** diseñada para demostrar vulnerabilidades **SSRF** y **XSS** en
-entornos controlados.\
-Incluye generación de PDF con Puppeteer, sanitización de HTML y rutas
-vulnerables para fines educativos.
+`ssrf-demo-notes` is a small application built with **Node.js + Express + SQLite** designed to demonstrate **SSRF** and **XSS** vulnerabilities in a controlled environment.  
+It includes PDF generation with Puppeteer, HTML sanitization, and intentionally vulnerable routes for educational purposes.
 
-> ⚠️ **Propósito educativo únicamente.**\
-> No debe utilizarse en producción ni para atacar sistemas reales.
+> ⚠️ **Educational use only.**  
+> Do not use this in production or for attacking real systems.
 
-------------------------------------------------------------------------
+---
 
-## 🚀 Características principales
+## 🚀 Main Features
 
--   CRUD básico de notas usando **SQLite**
+- Basic CRUD for notes using **SQLite**
+- Renders user-supplied HTML
+- Real **SSRF** demonstration:
+  - The server performs HTTP requests to user-provided URLs
+  - Includes examples accessing `http://169.254.169.254/latest/meta-data`
+- **XSS** demonstration if sanitization is disabled
+- PDF generation using Puppeteer/Chromium via:
+  ```
+  /notes/:id/pdf
+  ```
+- Simple, readable code ideal for:
+  - Teaching SSRF
+  - Showing server-side protection patterns
+  - Demonstrating IMDSv2 usage
+  - Explaining server-side HTML sanitization and URL validation
 
--   Renderizado de contenido HTML enviado por el usuario
+---
 
--   Ejemplo real de **SSRF**:
+## 📥 Installation
 
-    -   El servidor hace peticiones HTTP a URLs definidas por el usuario
-    -   Permite reproducir accesos a
-        `http://169.254.169.254/latest/meta-data`
+### 1. Clone the repository
 
--   Ejemplos de **XSS** si se deshabilita el sanitizer
-
--   Generación de **PDF** usando Puppeteer/Chromium mediante:
-
-        /notes/:id/pdf
-
--   Código simple, ideal para:
-
-    -   Demostraciones de SSRF
-    -   Explicar cómo evitarlo
-    -   Uso correcto de IMDSv2
-    -   Validación de input del lado del servidor
-
-------------------------------------------------------------------------
-
-## 📥 Instalación
-
-### 1. Clona el repositorio
-
-``` bash
+```bash
 git clone git@github.com:lccjavo/ssrf-demo-notes.git
 cd ssrf-demo-notes
 ```
 
-### 2. Instala dependencias
+### 2. Install dependencies
 
-``` bash
+```bash
 npm install
 ```
 
-Si tienes errores de permisos en Linux:
+If you get permission errors on Linux:
 
-``` bash
+```bash
 sudo chown -R $USER:$USER ~/.npm
 npm install
 ```
 
-### 3. Inicia la aplicación
+### 3. Run the application
 
-``` bash
+```bash
 npm start
 ```
 
-Accede en:\
+Open in browser:  
 http://localhost:3000
 
-------------------------------------------------------------------------
+---
 
-## ⚙️ Variables de entorno (opcional)
+## ⚙️ Optional Environment Variables
 
-Crea un archivo `.env` si necesitas configuración adicional:
+Create a `.env` file if needed:
 
-    PORT=3000
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+```
+PORT=3000
+PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+```
 
-------------------------------------------------------------------------
+---
 
-## 📚 Endpoints principales
+## 📚 Main Endpoints
 
 ### ➤ `GET /notes`
-
-Lista todas las notas.
+List all notes.
 
 ### ➤ `GET /notes/:id`
-
-Ver una nota específica.
+View a specific note.
 
 ### ➤ `POST /notes`
-
-Crear nueva nota (puede incluir HTML).
+Create a new note (HTML allowed).
 
 ### ➤ `POST /notes/:id/update`
-
-Actualizar nota.
+Update existing note.
 
 ### ➤ `GET /notes/:id/pdf`
+Generate a PDF of a note using Puppeteer.
 
-Genera un PDF de la nota usando Puppeteer.
+---
 
-------------------------------------------------------------------------
+## 🧪 SSRF Demonstration
 
-## 🧪 Demostración de SSRF
+The app allows users to send any URL, and the server will attempt to fetch it:
 
-La app permite enviar una URL arbitraria que el servidor intentará
-solicitar:
-
-``` json
+```json
 {
   "url": "http://169.254.169.254/latest/meta-data/"
 }
 ```
 
-Esto permite demostrar:
+This demonstrates:
 
--   Cómo acceder al **IMDS** cuando no está protegido
--   Cómo un SSRF puede obtener credenciales IAM temporales
--   Cómo mitigar usando:
-    -   IMDSv2
-    -   Reglas de firewall
-    -   Validación estricta de URLs (allowlist)
+- How IMDS can be accessed if not protected
+- How SSRF can leak temporary AWS IAM credentials
+- Mitigation examples:
+  - IMDSv2 usage
+  - Firewall restrictions
+  - Strict URL validation (allowlist)
 
-------------------------------------------------------------------------
+---
 
-## 🧪 Demostración de XSS
+## 🧪 XSS Demonstration
 
-Ejemplo de payload:
+Example payload:
 
-``` html
-<img src="x" onerror="alert('XSS de prueba')">
+```html
+<img src="x" onerror="alert('Test XSS')">
 ```
 
-Si el `sanitize.js` está desactivado → el navegador lo ejecuta.
+If `sanitize.js` is disabled → the browser executes it.
 
-------------------------------------------------------------------------
+---
 
-## 🛡️ Seguridad y mitigaciones incluidas
+## 🛡️ Security & Mitigation Patterns Included
 
--   Sanitización de HTML usando una allowlist
--   Bloqueo explícito de URLs internas (opcional)
--   Recomendaciones de uso de **IMDSv2**
--   Validación de URLs antes de realizar requests externas
--   Ejemplos de patrones de protección contra SSRF
+- HTML sanitization through allowlist
+- Optional blocking of internal/private IP ranges
+- IMDSv2 security recommendations
+- URL validation before making server-side requests
+- Examples of common SSRF protection patterns
 
-------------------------------------------------------------------------
+---
 
-## 📦 Despliegue rápido en EC2
+## 📦 Quick Deployment on EC2
 
-### Instalar Node.js:
+### Install Node.js
 
-``` bash
+```bash
 curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
 sudo apt install -y nodejs
 ```
 
-### Inicializa la app:
+### Start the app
 
-``` bash
+```bash
 npm install
 npm start
 ```
 
-Para correr en background con PM2:
+Run in background with PM2:
 
-``` bash
-pm2 start server.js
+```bash
+pm2 start app.js
 ```
 
-------------------------------------------------------------------------
+---
 
-## 🤝 Contribuciones
+## 🤝 Contributing
 
-Pull requests y mejoras son bienvenidas.\
-Puedes abrir un issue si deseas sugerir nuevas vulnerabilidades,
-mitigaciones, ejemplos o mejoras en el demo.
+Pull requests and improvements are welcome.  
+You can also open an issue for new vulnerability examples, improvements, or documentation enhancements.
 
-------------------------------------------------------------------------
+---
 
-## 📜 Licencia
+## 📜 License
 
 MIT License.

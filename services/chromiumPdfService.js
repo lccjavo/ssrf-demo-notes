@@ -3,14 +3,14 @@ const puppeteer = require('puppeteer');
 
 async function generatePdfWithChromium(html) {
   const browser = await puppeteer.launch({
-    headless: true,                             // usa el modo clásico para evitar líos
+    headless: true,                             // uses classic mode to avoid issues
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
   });
 
   try {
     const page = await browser.newPage();
 
-    // Carga el HTML; networkidle0 = cuando ya no hay requests de red pendientes
+    // Load HTML; networkidle0 = when there are no pending network requests
     await page.setContent(html, { waitUntil: 'networkidle0' });
 
     const pdfBuffer = await page.pdf({

@@ -22,7 +22,7 @@ router.get('/remote', (req, res) => {
             <div class="card-body">
               <h2 class="h4 mb-3">Remote Fetch (Demo SSRF)</h2>
               <p class="text-muted">
-                Este formulario hace una petición HTTP desde <strong>el servidor</strong> a la URL que pongas.
+                This form makes an HTTP request from <strong>the server</strong> to the URL you provide.
               </p>
               <form action="/remote/fetch" method="GET">
                 <div class="mb-3">
@@ -30,7 +30,7 @@ router.get('/remote', (req, res) => {
                   <input type="text" name="url" class="form-control"
                     placeholder="http://example.com" required>
                 </div>
-                <button type="submit" class="btn btn-primary">Hacer petición desde el servidor</button>
+                <button type="submit" class="btn btn-primary">Send request from server</button>
               </form>
             </div>
           </div>
@@ -42,7 +42,7 @@ router.get('/remote', (req, res) => {
   );
 });
 
-// Resultado SSRF demo
+// SSRF result demo
 router.get('/remote/fetch', async (req, res) => {
   const user = getCurrentUser(req);
   const targetUrl = req.query.url;
@@ -63,7 +63,7 @@ router.get('/remote/fetch', async (req, res) => {
           <div class="col-lg-10">
             <div class="card mb-3">
               <div class="card-body">
-                <h2 class="h4 mb-3">Resultado de la petición desde el servidor</h2>
+                <h2 class="h4 mb-3">Result of the server-side request</h2>
                 <dl class="row small">
                   <dt class="col-sm-2">URL</dt>
                   <dd class="col-sm-10">${escapeHtml(targetUrl)}</dd>
@@ -75,7 +75,7 @@ router.get('/remote/fetch', async (req, res) => {
                   <dd class="col-sm-10">${escapeHtml(contentType)}</dd>
                 </dl>
 
-                <h5 class="mt-3">Body (primeros 4000 caracteres)</h5>
+                <h5 class="mt-3">Body (first 4000 characters)</h5>
                 <pre class="bg-light border rounded p-3" style="white-space: pre-wrap; max-height: 400px; overflow:auto;">
 ${escapeHtml(body)}
                 </pre>
@@ -98,12 +98,12 @@ ${escapeHtml(body)}
           <div class="col-lg-8">
             <div class="card border-danger">
               <div class="card-body">
-                <h2 class="h4 text-danger mb-3">Error al hacer la petición</h2>
+                <h2 class="h4 text-danger mb-3">Error while making the request</h2>
                 <p><strong>URL:</strong> ${escapeHtml(targetUrl)}</p>
                 <pre class="bg-light border rounded p-3" style="white-space: pre-wrap;">
 ${escapeHtml(err.message)}
                 </pre>
-                <a href="/remote" class="btn btn-outline-secondary btn-sm mt-2">Volver</a>
+                <a href="/remote" class="btn btn-outline-secondary btn-sm mt-2">Back</a>
               </div>
             </div>
           </div>

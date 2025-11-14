@@ -8,7 +8,7 @@ const { sanitizeNoteHtml } = require('../utils/sanitize');
 const puppeteer = require('puppeteer');
 const { generatePdfWithChromium } = require('../services/chromiumPdfService');
 
-// Helpers de auth
+// Auth helpers
 function getCurrentUser(req) {
   return req.session && req.session.user ? req.session.user : null;
 }
@@ -21,7 +21,7 @@ function requireAuth(req, res, next) {
 }
 
 /* ============================================================================
-   LISTADO DE NOTAS (solo del usuario actual)
+   LISTADO DE notes (solo del user actual)
 ============================================================================ */
 router.get('/', requireAuth, async (req, res) => {
   const user = getCurrentUser(req);
@@ -45,12 +45,12 @@ router.get('/', requireAuth, async (req, res) => {
                 ${escapeHtml(note.created_at)}
               </small>
               <div class="card-text">
-                ${safeSnippet || '<span class="text-muted">(sin contenido)</span>'}
+                ${safeSnippet || '<span class="text-muted">(sin content)</span>'}
               </div>
               <div class="mt-2 d-flex flex-wrap gap-2">
-                <a href="/notes/${note.id}/edit" class="btn btn-sm btn-primary">Editar</a>
-                <form action="/notes/${note.id}/delete" method="POST" onsubmit="return confirm('¿Eliminar nota?');">
-                  <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                <a href="/notes/${note.id}/edit" class="btn btn-sm btn-primary">edit</a>
+                <form action="/notes/${note.id}/delete" method="POST" onsubmit="return confirm('Delete note?');">
+                  <button type="submit" class="btn btn-sm btn-danger">delete</button>
                 </form>
                 <a href="/notes/${note.id}/pdf" target="_blank" class="btn btn-sm btn-outline-secondary">
                   PDF
@@ -64,58 +64,58 @@ router.get('/', requireAuth, async (req, res) => {
 
     res.send(
       layout(
-        'Notas',
+        'notes',
         `
         <div class="d-flex justify-content-between align-items-center mb-3">
-          <h2 class="h4 mb-0">Tus notas</h2>
-          <a href="/notes/new" class="btn btn-success">Nueva nota</a>
+          <h2 class="h4 mb-0">Your notes</h2>
+          <a href="/notes/new" class="btn btn-success">New note</a>
         </div>
-        ${listHtml || '<p class="text-muted">No hay notas todavía.</p>'}
+        ${listHtml || '<p class="text-muted">No notes yet.</p>'}
         `,
         user
       )
     );
   } catch (err) {
     console.error(err);
-    res.status(500).send('Error al leer notas');
+    res.status(500).send('Error reading notes');
   }
 });
 
 
 /* ============================================================================
-   NUEVA NOTA
+   NUEVA note
 ============================================================================ */
 router.get('/notes/new', requireAuth, (req, res) => {
   const user = getCurrentUser(req);
 
   res.send(
     layout(
-      'Nueva nota',
+      'Nueva note',
       `
       <div class="row justify-content-center">
         <div class="col-md-8 col-lg-6">
           <div class="card">
             <div class="card-body">
-              <h2 class="h4 mb-3">Nueva nota</h2>
+              <h2 class="h4 mb-3">Nueva note</h2>
               <form action="/notes" method="POST">
                 <div class="mb-3">
-                  <label class="form-label">Título</label>
+                  <label class="form-label">Title</label>
                   <input type="text" name="title" class="form-control" required>
                 </div>
                 <div class="mb-3">
                   <label class="form-label">
-                    Contenido <small class="text-muted">(HTML permitido limitado)</small>
+                    Content <small class="text-muted">(Limited allowed HTML)</small>
                   </label>
                   <textarea
                     name="content"
                     class="form-control rich-editor"
                     rows="8"
-                    placeholder="<h1>Título</h1><p>Texto...</p>"
+                    placeholder="<h1>Title</h1><p>Text...</p>"
                   ></textarea>
                 </div>
                 <div class="d-flex justify-content-between">
-                  <a href="/" class="btn btn-outline-secondary">Cancelar</a>
-                  <button type="submit" class="btn btn-primary">Guardar</button>
+                  <a href="/" class="btn btn-outline-secondary">cancel</a>
+                  <button type="submit" class="btn btn-primary">Save</button>
                 </div>
               </form>
             </div>
@@ -129,7 +129,7 @@ router.get('/notes/new', requireAuth, (req, res) => {
 });
 
 /* ============================================================================
-   CREAR NOTA
+   create note
 ============================================================================ */
 router.post('/notes', requireAuth, async (req, res) => {
   const user = getCurrentUser(req);
@@ -140,12 +140,12 @@ router.post('/notes', requireAuth, async (req, res) => {
     res.redirect(`/notes/${id}`);
   } catch (err) {
     console.error(err);
-    res.status(500).send('Error al guardar nota');
+    res.status(500).send('Error al save note');
   }
 });
 
 /* ============================================================================
-   VER NOTA (solo si pertenece al usuario)
+   VER note (solo si pertenece al user)
 ============================================================================ */
 router.get('/notes/:id', requireAuth, async (req, res) => {
   const user = getCurrentUser(req);
@@ -153,7 +153,7 @@ router.get('/notes/:id', requireAuth, async (req, res) => {
 
   try {
     const note = await noteService.getNoteById(id, user.id);
-    if (!note) return res.status(404).send('Nota no encontrada');
+    if (!note) return res.status(404).send('Note not found');
 
     //const safeContent = sanitizeNoteHtml(note.content || '');
     const safeContent = note.content
@@ -171,14 +171,14 @@ router.get('/notes/:id', requireAuth, async (req, res) => {
                   Creada: ${escapeHtml(note.created_at)}
                 </small>
                 <div class="border rounded p-3 bg-white">
-                  ${safeContent || '<em class="text-muted">(sin contenido)</em>'}
+                  ${safeContent || '<em class="text-muted">(sin content)</em>'}
                 </div>
                 <div class="mt-3 d-flex flex-wrap gap-2">
-                  <a href="/notes/${note.id}/edit" class="btn btn-primary btn-sm">Editar</a>
+                  <a href="/notes/${note.id}/edit" class="btn btn-primary btn-sm">edit</a>
                   <a href="/notes/${note.id}/pdf" target="_blank" class="btn btn-outline-secondary btn-sm">
-                    Descargar PDF
+                    download PDF
                   </a>
-                  <a href="/" class="btn btn-link btn-sm">Volver al listado</a>
+                  <a href="/" class="btn btn-link btn-sm">back al listado</a>
                 </div>
               </div>
             </div>
@@ -190,12 +190,12 @@ router.get('/notes/:id', requireAuth, async (req, res) => {
     );
   } catch (err) {
     console.error(err);
-    res.status(500).send('Error al leer nota');
+    res.status(500).send('Error al leer note');
   }
 });
 
 /* ============================================================================
-   FORMULARIO EDITAR NOTA
+   FORMULARIO edit note
 ============================================================================ */
 router.get('/notes/:id/edit', requireAuth, async (req, res) => {
   const user = getCurrentUser(req);
@@ -203,20 +203,20 @@ router.get('/notes/:id/edit', requireAuth, async (req, res) => {
 
   try {
     const note = await noteService.getNoteById(id, user.id);
-    if (!note) return res.status(404).send('Nota no encontrada');
+    if (!note) return res.status(404).send('Note not found');
 
     res.send(
       layout(
-        `Editar: ${escapeHtml(note.title)}`,
+        `edit: ${escapeHtml(note.title)}`,
         `
         <div class="row justify-content-center">
           <div class="col-md-8 col-lg-6">
             <div class="card">
               <div class="card-body">
-                <h2 class="h4 mb-3">Editar nota</h2>
+                <h2 class="h4 mb-3">edit note</h2>
                 <form action="/notes/${note.id}/update" method="POST">
                   <div class="mb-3">
-                    <label class="form-label">Título</label>
+                    <label class="form-label">Title</label>
                     <input
                       type="text"
                       name="title"
@@ -227,7 +227,7 @@ router.get('/notes/:id/edit', requireAuth, async (req, res) => {
                   </div>
                   <div class="mb-3">
                     <label class="form-label">
-                      Contenido <small class="text-muted">(HTML permitido limitado)</small>
+                      Content <small class="text-muted">(Limited allowed HTML)</small>
                     </label>
                     <textarea
                       name="content"
@@ -236,7 +236,7 @@ router.get('/notes/:id/edit', requireAuth, async (req, res) => {
                     >${escapeHtml(note.content || '')}</textarea>
                   </div>
                   <div class="d-flex justify-content-between">
-                    <a href="/notes/${note.id}" class="btn btn-outline-secondary">Cancelar</a>
+                    <a href="/notes/${note.id}" class="btn btn-outline-secondary">cancel</a>
                     <button type="submit" class="btn btn-primary">Actualizar</button>
                   </div>
                 </form>
@@ -250,12 +250,12 @@ router.get('/notes/:id/edit', requireAuth, async (req, res) => {
     );
   } catch (err) {
     console.error(err);
-    res.status(500).send('Error al cargar nota para edición');
+    res.status(500).send('Error loading note for editing');
   }
 });
 
 /* ============================================================================
-   ACTUALIZAR NOTA
+   ACTUALIZAR note
 ============================================================================ */
 router.post('/notes/:id/update', requireAuth, async (req, res) => {
   const user = getCurrentUser(req);
@@ -264,17 +264,17 @@ router.post('/notes/:id/update', requireAuth, async (req, res) => {
 
   try {
     const changes = await noteService.updateNote(id, user.id, title, content);
-    if (!changes) return res.status(404).send('Nota no encontrada');
+    if (!changes) return res.status(404).send('Note not found');
 
     res.redirect(`/notes/${id}`);
   } catch (err) {
     console.error(err);
-    res.status(500).send('Error al actualizar nota');
+    res.status(500).send('Error updating note');
   }
 });
 
 /* ============================================================================
-   ELIMINAR NOTA
+   delete note
 ============================================================================ */
 router.post('/notes/:id/delete', requireAuth, async (req, res) => {
   const user = getCurrentUser(req);
@@ -285,12 +285,12 @@ router.post('/notes/:id/delete', requireAuth, async (req, res) => {
     res.redirect('/');
   } catch (err) {
     console.error(err);
-    res.status(500).send('Error al eliminar nota');
+    res.status(500).send('Error deleting note');
   }
 });
 
 /* ============================================================================
-   PDF (solo si pertenece al usuario)
+   PDF (solo si pertenece al user)
 ============================================================================ */
 
 
@@ -301,10 +301,10 @@ router.get('/notes/:id/pdf', requireAuth, async (req, res) => {
   try {
     const note = await noteService.getNoteById(id, user.id);
     if (!note) {
-      return res.status(404).send('Nota no encontrada');
+      return res.status(404).send('Note not found');
     }
 
-    // Para PoC vulnerable podrías usar note.content tal cual:
+    // Para PoC vulnerable podras usar note.content tal cual:
     const contentHtml = note.content || '';
 
     // o si quieres que coincida con la vista:
@@ -317,7 +317,7 @@ router.get('/notes/:id/pdf', requireAuth, async (req, res) => {
       <html lang="es">
         <head>
           <meta charset="utf-8">
-          <title>${escapeHtml(note.title || 'Nota')}</title>
+          <title>${escapeHtml(note.title || 'note')}</title>
           <link
             href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
             rel="stylesheet"
@@ -325,7 +325,7 @@ router.get('/notes/:id/pdf', requireAuth, async (req, res) => {
         </head>
         <body class="p-4">
           <div class="container">
-            <h1 class="mb-2">${escapeHtml(note.title || 'Nota')}</h1>
+            <h1 class="mb-2">${escapeHtml(note.title || 'note')}</h1>
             <p class="text-muted" style="font-size: 12px;">
               Creada: ${escapeHtml(note.created_at || '')}
             </p>
@@ -341,12 +341,12 @@ router.get('/notes/:id/pdf', requireAuth, async (req, res) => {
     const pdfBuffer = await generatePdfWithChromium(fullHtml);
 
     const safeFilename =
-      (note.title || 'nota')
+      (note.title || 'note')
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
         .replace(/[^a-zA-Z0-9]+/g, '-')
         .replace(/^-+|-+$/g, '')
-        .toLowerCase() || 'nota';
+        .toLowerCase() || 'note';
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader(
@@ -355,13 +355,13 @@ router.get('/notes/:id/pdf', requireAuth, async (req, res) => {
     );
     res.setHeader('Content-Length', pdfBuffer.length);
 
-    // Muy importante: enviar el buffer tal cual, sin nada más
+    // Very important: send the buffer as-is, with no extra content
     res.end(pdfBuffer);
   } catch (err) {
-    console.error('Error generando PDF con Chromium:', err);
-    // Si algo sale mal, mandamos un 500 con texto (no PDF)
+    console.error('Error generating PDF with Chromium:', err);
+    // If something goes wrong, send a 500 with plain text (not PDF)
     if (!res.headersSent) {
-      res.status(500).send('Error al generar PDF');
+      res.status(500).send('Error generating PDF');
     }
   }
 });

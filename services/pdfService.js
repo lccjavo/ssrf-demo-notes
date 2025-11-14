@@ -1,25 +1,25 @@
 const PDFDocument = require('pdfkit');
 const { sanitizeNoteHtml } = require('../utils/sanitize');
 
-// Helper para el nombre del archivo
+// Helper for the filename
 function slugify(str) {
-  if (!str) return 'nota';
+  if (!str) return 'note';
   return (
     String(str)
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
       .replace(/[^a-zA-Z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '')
-      .toLowerCase() || 'nota'
+      .toLowerCase() || 'note'
   );
 }
 
-// Decodificar entidades HTML comunes
+// Decode common HTML entities
 function decodeHtmlEntities(str) {
   return String(str || '')
     .replace(/\r/g, '')       // quitar \r que a veces mete símbolos raros
     .replace(/&nbsp;/g, ' ')
-    .replace(/\u00A0/g, ' ')  // NBSP real
+    .replace(/\u00A0/g, ' ')  // real NBSP
     .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
@@ -27,7 +27,7 @@ function decodeHtmlEntities(str) {
     .replace(/&#39;/g, "'");
 }
 
-// Quitar etiquetas HTML (después de manejar las importantes)
+// Remove HTML tags (después de manejar las importantes)
 function stripTags(str) {
   return String(str || '').replace(/<[^>]+>/g, '');
 }
@@ -35,7 +35,7 @@ function stripTags(str) {
 function renderHtmlToPdf(doc, htmlRaw) {
   // Si es null/undefined
   if (htmlRaw == null) {
-    doc.fontSize(12).text('(sin contenido)');
+    doc.fontSize(12).text('(sin content)');
     return;
   }
 
@@ -44,7 +44,7 @@ function renderHtmlToPdf(doc, htmlRaw) {
   const originalTrimmed = html.trim();
 
   if (!originalTrimmed) {
-    doc.fontSize(12).text('(sin contenido)');
+    doc.fontSize(12).text('(sin content)');
     return;
   }
 
@@ -55,7 +55,7 @@ function renderHtmlToPdf(doc, htmlRaw) {
 
   if (!looksLikeHtml) {
     const plain = html.replace(/\n{3,}/g, '\n\n').trim();
-    doc.fontSize(12).fillColor('black').text(plain || '(sin contenido)', {
+    doc.fontSize(12).fillColor('black').text(plain || '(sin content)', {
       align: 'left',
     });
     return;
@@ -98,13 +98,13 @@ function renderHtmlToPdf(doc, htmlRaw) {
   }
 
   // 👉 3) Si no encontramos ningún bloque H/P/LI pero sí hay texto,
-  // hacemos fallback a texto plano en vez de "(sin contenido)"
+  // hacemos fallback a texto plano en vez de "(sin content)"
   if (!foundAny) {
     const plain = stripTags(html);
     const clean = decodeHtmlEntities(plain).trim();
 
     doc.fontSize(12).fillColor('black').text(
-      clean || originalTrimmed || '(sin contenido)',
+      clean || originalTrimmed || '(sin content)',
       { align: 'left' }
     );
   }
@@ -112,11 +112,11 @@ function renderHtmlToPdf(doc, htmlRaw) {
 
 
 function createNotePdf(note) {
-  const filename = `${slugify(note.title || 'nota')}.pdf`;
+  const filename = `${slugify(note.title || 'note')}.pdf`;
   const doc = new PDFDocument({ size: 'A4', margin: 50 });
 
-  // Título
-  doc.fontSize(20).fillColor('black').text(note.title || 'Nota', {
+  // title
+  doc.fontSize(20).fillColor('black').text(note.title || 'note', {
     align: 'left',
   });
   doc.moveDown(0.5);

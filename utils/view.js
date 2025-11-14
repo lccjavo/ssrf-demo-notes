@@ -11,14 +11,14 @@ function escapeHtml(str) {
 function layout(pageTitle, bodyHtml, user) {
   const authSection = user
     ? `
-      <span class="me-2">Hola, ${escapeHtml(user.email)}</span>
+      <span class="me-2">Hi, ${escapeHtml(user.email)}</span>
       <form action="/logout" method="POST" class="d-inline">
         <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
       </form>
     `
     : `
       <a href="/login" class="btn btn-outline-light btn-sm me-2">Login</a>
-      <a href="/register" class="btn btn-warning btn-sm">Registro</a>
+      <a href="/register" class="btn btn-warning btn-sm">Register</a>
     `;
 
   return `
@@ -37,7 +37,7 @@ function layout(pageTitle, bodyHtml, user) {
         crossorigin="anonymous"
       >
 
-      <!-- TinyMCE (CDN, sin API key para demo) -->
+      <!-- TinyMCE (CDN, no API key needed for demo) -->
       <script
         src="https://cdn.jsdelivr.net/npm/tinymce@6.8.3/tinymce.min.js"
         referrerpolicy="origin"
@@ -65,10 +65,10 @@ function layout(pageTitle, bodyHtml, user) {
           <div class="collapse navbar-collapse" id="mainNavbar">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
               <li class="nav-item">
-                <a class="nav-link" href="/">Listado</a>
+                <a class="nav-link" href="/">Notes</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="/notes/new">Nueva nota</a>
+                <a class="nav-link" href="/notes/new">New note</a>
               </li>
               <li class="nav-item">
                 <a class="nav-link" href="/remote">Remote fetch (SSRF demo)</a>
@@ -92,7 +92,7 @@ function layout(pageTitle, bodyHtml, user) {
         crossorigin="anonymous"
       ></script>
 
-      <!-- TinyMCE init (solo si hay textarea.rich-editor en la página) -->
+      <!-- TinyMCE init (only if there is a textarea.rich-editor on the page) -->
       <script>
         document.addEventListener('DOMContentLoaded', function () {
           if (document.querySelector('textarea.rich-editor')) {

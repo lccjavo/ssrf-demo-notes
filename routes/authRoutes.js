@@ -8,20 +8,20 @@ function getCurrentUser(req) {
   return req.session && req.session.user ? req.session.user : null;
 }
 
-/* REGISTRO */
+/* REGISTER */
 router.get('/register', (req, res) => {
   const user = getCurrentUser(req);
   if (user) return res.redirect('/');
 
   res.send(
     layout(
-      'Registro',
+      'Register',
       `
       <div class="row justify-content-center">
         <div class="col-md-6 col-lg-4">
           <div class="card">
             <div class="card-body">
-              <h2 class="h4 mb-3">Crear cuenta</h2>
+              <h2 class="h4 mb-3">create cuenta</h2>
               <form action="/register" method="POST">
                 <div class="mb-3">
                   <label class="form-label">Email</label>
@@ -31,9 +31,9 @@ router.get('/register', (req, res) => {
                   <label class="form-label">Password</label>
                   <input type="password" name="password" class="form-control" required>
                 </div>
-                <button type="submit" class="btn btn-primary w-100 mb-2">Registrarme</button>
+                <button type="submit" class="btn btn-primary w-100 mb-2">Sign up</button>
                 <p class="mb-0 text-center">
-                  ¿Ya tienes cuenta? <a href="/login">Inicia sesión</a>
+                  Already have an account? <a href="/login">Log in</a>
                 </p>
               </form>
             </div>
@@ -58,18 +58,18 @@ router.post('/register', async (req, res) => {
     res.redirect('/');
   } catch (err) {
     console.error(err);
-    let msg = 'Error al registrarse';
-    if (err.code === 'EMAIL_EXISTS') msg = 'Ese email ya está registrado';
+    let msg = 'Error while registering';
+    if (err.code === 'EMAIL_EXISTS') msg = 'That email is already registered';
 
     res.send(
       layout(
-        'Registro',
+        'Register',
         `
         <div class="row justify-content-center">
           <div class="col-md-6 col-lg-4">
             <div class="card">
               <div class="card-body">
-                <h2 class="h4 mb-3">Crear cuenta</h2>
+                <h2 class="h4 mb-3">create cuenta</h2>
                 <p class="text-danger">${escapeHtml(msg)}</p>
                 <form action="/register" method="POST">
                   <div class="mb-3">
@@ -81,9 +81,9 @@ router.post('/register', async (req, res) => {
                     <label class="form-label">Password</label>
                     <input type="password" name="password" class="form-control" required>
                   </div>
-                  <button type="submit" class="btn btn-primary w-100 mb-2">Registrarme</button>
+                  <button type="submit" class="btn btn-primary w-100 mb-2">Sign up</button>
                   <p class="mb-0 text-center">
-                    ¿Ya tienes cuenta? <a href="/login">Inicia sesión</a>
+                    Already have an account? <a href="/login">Log in</a>
                   </p>
                 </form>
               </div>
@@ -110,7 +110,7 @@ router.get('/login', (req, res) => {
         <div class="col-md-6 col-lg-4">
           <div class="card">
             <div class="card-body">
-              <h2 class="h4 mb-3">Iniciar sesión</h2>
+              <h2 class="h4 mb-3">Log in</h2>
               <form action="/login" method="POST">
                 <div class="mb-3">
                   <label class="form-label">Email</label>
@@ -120,9 +120,9 @@ router.get('/login', (req, res) => {
                   <label class="form-label">Password</label>
                   <input type="password" name="password" class="form-control" required>
                 </div>
-                <button type="submit" class="btn btn-primary w-100 mb-2">Entrar</button>
+                <button type="submit" class="btn btn-primary w-100 mb-2">Log in</button>
                 <p class="mb-0 text-center">
-                  ¿No tienes cuenta? <a href="/register">Regístrate</a>
+                  Don't have an account? <a href="/register">Sign up</a>
                 </p>
               </form>
             </div>
@@ -156,8 +156,8 @@ router.post('/login', async (req, res) => {
           <div class="col-md-6 col-lg-4">
             <div class="card">
               <div class="card-body">
-                <h2 class="h4 mb-3">Iniciar sesión</h2>
-                <p class="text-danger">Email o contraseña incorrectos</p>
+                <h2 class="h4 mb-3">Log in</h2>
+                <p class="text-danger">Incorrect email or password</p>
                 <form action="/login" method="POST">
                   <div class="mb-3">
                     <label class="form-label">Email</label>
@@ -168,9 +168,9 @@ router.post('/login', async (req, res) => {
                     <label class="form-label">Password</label>
                     <input type="password" name="password" class="form-control" required>
                   </div>
-                  <button type="submit" class="btn btn-primary w-100 mb-2">Entrar</button>
+                  <button type="submit" class="btn btn-primary w-100 mb-2">Log in</button>
                   <p class="mb-0 text-center">
-                    ¿No tienes cuenta? <a href="/register">Regístrate</a>
+                    Don't have an account? <a href="/register">Sign up</a>
                   </p>
                 </form>
               </div>

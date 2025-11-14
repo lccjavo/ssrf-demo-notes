@@ -12,10 +12,10 @@ const remoteRoutes = require('./routes/remoteRoutes');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware para parsear body
+// Middleware to parse body
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Middleware de sesión – IMPORTANTE que vaya ANTES de las rutas
+// Session middleware – IMPORTANT: must be BEFORE the routes
 app.use(
   session({
     secret: process.env.SESSION_SECRET || 'secret',
@@ -24,12 +24,12 @@ app.use(
   })
 );
 
-// Rutas (ya reciben req.session inicializado)
+// Routes (req.session is already initialized)
 app.use('/', authRoutes);
 app.use('/', notesRoutes);
 app.use('/', remoteRoutes);
 
-// Arrancar servidor
+// Start server
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`App escuchando en http://0.0.0.0:${PORT}`);
+  console.log(`App listening at http://0.0.0.0:${PORT}`);
 });
