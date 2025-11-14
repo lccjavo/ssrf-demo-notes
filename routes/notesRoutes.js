@@ -30,7 +30,8 @@ router.get('/', requireAuth, async (req, res) => {
 
     const listHtml = rows
       .map((note) => {
-        const safeSnippet = sanitizeNoteHtml(note.snippet || '');
+        //const safeSnippet = sanitizeNoteHtml(note.snippet || '');
+        const safeSnippet = note.snippet
 
         return `
           <div class="card mb-3 note-list-item">
@@ -154,8 +155,9 @@ router.get('/notes/:id', requireAuth, async (req, res) => {
     const note = await noteService.getNoteById(id, user.id);
     if (!note) return res.status(404).send('Nota no encontrada');
 
-    const safeContent = sanitizeNoteHtml(note.content || '');
-
+    //const safeContent = sanitizeNoteHtml(note.content || '');
+    const safeContent = note.content
+    
     res.send(
       layout(
         escapeHtml(note.title),
@@ -302,13 +304,13 @@ router.get('/notes/:id/pdf', requireAuth, async (req, res) => {
       return res.status(404).send('Nota no encontrada');
     }
 
-    // ⚠️ Para PoC vulnerable podrías usar note.content tal cual:
-    //const contentHtml = note.content || '';
+    // Para PoC vulnerable podrías usar note.content tal cual:
+    const contentHtml = note.content || '';
 
     // o si quieres que coincida con la vista:
-    const contentHtml = sanitizeNoteHtml
-      ? sanitizeNoteHtml(note.content || '')
-      : (note.content || '');
+    // const contentHtml = sanitizeNoteHtml
+    //   ? sanitizeNoteHtml(note.content || '')
+    //   : (note.content || '');
 
     const fullHtml = `
       <!doctype html>

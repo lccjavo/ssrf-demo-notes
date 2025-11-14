@@ -8,11 +8,7 @@ function sanitizeNoteHtml(html) {
       'p', 'b', 'i', 'em', 'strong', 'u',
       'ul', 'ol', 'li',
       'br', 'span', 'div',
-      'a',
-      // SSRF demo tags
-      'img',
-      'iframe',
-      'object'
+      'a'
     ],
     allowedAttributes: {
       a: ['href', 'title', 'target'],
