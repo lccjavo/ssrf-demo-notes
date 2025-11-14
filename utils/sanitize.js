@@ -8,7 +8,7 @@ function sanitizeNoteHtml(html) {
       'p', 'b', 'i', 'em', 'strong', 'u',
       'ul', 'ol', 'li',
       'br', 'span', 'div',
-      'a'
+      'a', 'img'
     ],
     allowedAttributes: {
       a: ['href', 'title', 'target'],
