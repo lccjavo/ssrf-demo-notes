@@ -6,6 +6,7 @@ const { createNotePdf } = require('../services/pdfService');
 const { layout, escapeHtml } = require('../utils/view');
 const { sanitizeNoteHtml } = require('../utils/sanitize');
 const puppeteer = require('puppeteer');
+const { generatePdfWithChromium } = require('../services/chromiumPdfService');
 
 // Helpers de auth
 function getCurrentUser(req) {
@@ -297,25 +298,70 @@ router.get('/notes/:id/pdf', requireAuth, async (req, res) => {
 
   try {
     const note = await noteService.getNoteById(id, user.id);
-    if (!note) return res.status(404).send('Nota no encontrada');
+    if (!note) {
+      return res.status(404).send('Nota no encontrada');
+    }
 
-    const { doc, filename } = createNotePdf(note);
+    // ⚠️ Para PoC vulnerable podrías usar note.content tal cual:
+    //const contentHtml = note.content || '';
+
+    // o si quieres que coincida con la vista:
+    const contentHtml = sanitizeNoteHtml
+      ? sanitizeNoteHtml(note.content || '')
+      : (note.content || '');
+
+    const fullHtml = `
+      <!doctype html>
+      <html lang="es">
+        <head>
+          <meta charset="utf-8">
+          <title>${escapeHtml(note.title || 'Nota')}</title>
+          <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+          >
+        </head>
+        <body class="p-4">
+          <div class="container">
+            <h1 class="mb-2">${escapeHtml(note.title || 'Nota')}</h1>
+            <p class="text-muted" style="font-size: 12px;">
+              Creada: ${escapeHtml(note.created_at || '')}
+            </p>
+            <hr />
+            <div class="mt-3">
+              ${contentHtml}
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    const pdfBuffer = await generatePdfWithChromium(fullHtml);
+
+    const safeFilename =
+      (note.title || 'nota')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-zA-Z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .toLowerCase() || 'nota';
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader(
       'Content-Disposition',
-      `attachment; filename="${filename}"`
+      `attachment; filename="${safeFilename}.pdf"`
     );
+    res.setHeader('Content-Length', pdfBuffer.length);
 
-    doc.pipe(res);
-    doc.end();
+    // Muy importante: enviar el buffer tal cual, sin nada más
+    res.end(pdfBuffer);
   } catch (err) {
-    console.error(err);
-    res.status(500).send('Error al generar PDF');
+    console.error('Error generando PDF con Chromium:', err);
+    // Si algo sale mal, mandamos un 500 con texto (no PDF)
+    if (!res.headersSent) {
+      res.status(500).send('Error al generar PDF');
+    }
   }
 });
-
-
-
 
 module.exports = router;
